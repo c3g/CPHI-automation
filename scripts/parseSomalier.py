@@ -59,7 +59,7 @@ def update_json(json_file, genotype_matches):
         for sample in run_report_json['samples']:
             matches = {}
             for l in genotype_matches:
-                if sample == l[0].split("_")[1]:
+                if sample == '_'.join(l[0].split("_")[1:]):
                     matches[l[1]] = {
                             "sample_name" : '_'.join(l[1].split('_')[1:-1]),
                             "biosample_id" : l[1].rsplit('_', 1)[-1],

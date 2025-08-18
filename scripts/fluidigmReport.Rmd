@@ -155,7 +155,7 @@ writeLines(export_json, json_file)
 ```{r matches, echo=FALSE}
 matches <- somalier_data %>% 
   filter(relatedness >= 0.8) %>%
-  filter(str_split_i(`X.sample_a`, "_", 2) %in% snp_calls$Name | str_split_i(`sample_b`, "_", 2) %in% snp_calls$Name) %>%
+  filter(str_split_i(`X.sample_a`, "_", 1) == plate_barcode | str_split_i(`sample_b`, "_", 1) == plate_barcode) %>%
   select(`X.sample_a`, sample_b, relatedness, n) %>%
   dplyr::rename(sample_a = `X.sample_a`) %>% dplyr::rename(overlapping_sites = n)
 

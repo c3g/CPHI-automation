@@ -61,7 +61,7 @@ def create_json(sample_data, barcode, json_file):
                     (
                         row[4],
                         {
-                            "sample_name" : '_'.join(row[4].split('_')[1:-1]),
+                            "sample_name" : '_'.join(row[4].split('_')[:-1]),
                             "biosample_id" : row[4].rsplit('_', 1)[-1],
                             "sample_position" : re.sub("S", "", row[0].split("-")[0]),
                             "passed" : None,
