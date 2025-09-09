@@ -34,7 +34,7 @@ if [ -z "$FLUIDIGM_CSV" ] || [ -z "$RUN_DIR" ]; then
 fi
 
 ############################################################################################
-# workflow draft for getting somalier comparisons and fluidigm sex calls + creating json to send back to freezeman
+# workflow for getting somalier comparisons and fluidigm sex calls + creating json to send back to freezeman
 module purge && module load mugqic/python/3.12.2 mugqic/R_Bioconductor/4.3.2_3.18 mugqic/pandoc/2.16.2 mugqic/bcftools/1.19 mugqic/htslib/1.19.1 mugqic_dev/somalier/0.2.13 && \
 
 export SCRIPT_HOME=$(dirname $(realpath $0))
@@ -96,6 +96,9 @@ Rscript $SCRIPT_HOME/scripts/fluidigmReport.R \
 echo -e "\n\nparsed somalier, updated json, and created report" && \
 
 # 9. Email with report is sent to lab/others. json is ingested into freezeman.
+module purge && module load mugqic/python/3.10.4 && \
+python ${SCRIPT_HOME}/scripts/freezeman_ingest.py --url https://f5kvm-biobank-dev.genome.mcgill.ca/api/ --user techdevadmin --password $(cat ~/assets/.techdevadmin) --cert ~/monitor/assets/fullbundle.pem ${REPORTS_OUT}/report.fluidigm.${PLATE_BARCODE}.json && \
+
 echo "A new fluidigm genotyping run was detected: $PLATE_BARCODE.
 
 The results have been ingested into Freezeman and a summary report has been prepared.
