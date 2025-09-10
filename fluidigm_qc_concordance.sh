@@ -96,7 +96,7 @@ Rscript $SCRIPT_HOME/scripts/fluidigmReport.R \
 echo -e "\n\nparsed somalier, updated json, and created report" && \
 
 # 9. Email with report is sent to lab/others. json is ingested into freezeman.
-module purge && module load mugqic/python/3.10.4 && \
+module purge && module load mugqic/python/3.10.2 && \
 python ${SCRIPT_HOME}/scripts/freezeman_ingest.py --url https://f5kvm-biobank-dev.genome.mcgill.ca/api/ --user techdevadmin --password $(cat ~/assets/.techdevadmin) --cert ~/monitor/assets/fullbundle.pem ${REPORTS_OUT}/report.fluidigm.${PLATE_BARCODE}.json && \
 
 echo "A new fluidigm genotyping run was detected: $PLATE_BARCODE.
