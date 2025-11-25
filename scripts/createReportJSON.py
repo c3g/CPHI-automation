@@ -68,8 +68,8 @@ def create_json(sample_data, barcode, json_file):
                             "fluidigm_predicted_sex" : None,
                             "genotype_matches" : None
                         }
-                    ) for row in sample_data
-                    ]
+                    ) for row in [sample_data if row[5] != "NTC"]
+                ]
                 )
             }
 
