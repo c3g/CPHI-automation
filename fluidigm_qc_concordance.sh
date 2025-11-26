@@ -105,5 +105,5 @@ The results have been ingested into Freezeman and a summary report has been prep
 
 Please review the attached report to see any potential issues with the samples in the run.
 
-This is an automated notification, please do not reply." | mailx -s "Report for fluidigm $PLATE_BARCODE" -a $REPORTS_OUT/fluidigm_qc.${PLATE_BARCODE}.html -r abacus.genome@mail.mcgill.ca "mareike.janiak@computationalgenomics.ca" "ariane.boisclair@mcgill.ca" "lena.lichunfong@mcgill.ca" "ulysse.fortiergauthier@mcgill.ca" "jose.galvezlopez@mcgill.ca" && \
+This is an automated notification, please do not reply." | mailx -s "Report for fluidigm $PLATE_BARCODE" -a $REPORTS_OUT/fluidigm_qc.${PLATE_BARCODE}.html -r abacus.genome@mail.mcgill.ca "mareike.janiak@computationalgenomics.ca" "ariane.boisclair@mcgill.ca" "lena.lichunfong@mcgill.ca" "jose.galvezlopez@mcgill.ca" && \
 echo "Email sent"
