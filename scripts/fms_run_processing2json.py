@@ -71,12 +71,6 @@ def load_json_file(file_path):
         logger.error(f"Error decoding JSON file: {file_path}")
     return None
 
-def parse_sample_name(sample_name):
-    """Parse the sample name to extract specimen, cohort, and institution."""
-    result = re.search(r"^((NRGI-(\d+)_(\d+))", sample_name)
-    print(result)
-    return result.group(1), result.group(2)
-
 def jsonify_run_processing(input_run_folder, fms_json, lanes_json, output, lanes, samples, nucleic_acid_type):
     """
     Converts the Run Processing run validation file to a json file for project tracking database.
@@ -107,7 +101,7 @@ def jsonify_run_processing(input_run_folder, fms_json, lanes_json, output, lanes
         for readset_key, readset in lane_json["readsets"].items():
             sample_name = readset["sample_name"]
             if sample_name.startswith("NRGI") and lane_json['lane'] in lanes and sample_name in samples:
-                specimen, readset = parse_sample_name(sample_name)
+                specimen = readset["sample_name"]
                 # Check if the specimen is already in json_output["specimen"]
                 specimen_names = [spec["specimen_name"] for spec in json_output["specimen"]]
                 if specimen in specimen_names:
@@ -352,7 +346,7 @@ def median_insert_size_check(sample, value):
 
 def compute_md5(file_path, chunk_size=8 * 1024 * 1024):  # 8MB chunks
     """Compute or retrieve MD5 checksum of a file using EAFP style."""
-    md5_file_path = f"{file_path}.md5"
+    md5_file_path = f"{file_path}.md5sum"
 
     try:
         with open(md5_file_path, 'r') as f:
@@ -361,6 +355,7 @@ def compute_md5(file_path, chunk_size=8 * 1024 * 1024):  # 8MB chunks
     except (FileNotFoundError, IOError):
         pass  # Proceed to compute MD5 if .md5 file doesn't exist or can't be read
 
+    print("md5 not found for " + file_path)
     # Compute MD5
     md5 = hashlib.md5()
     with open(file_path, 'rb') as f:
@@ -376,7 +371,7 @@ def main():
     lanes = args.lane
 
     json_candidates = glob.glob(os.path.join(args.input, "*.json"))
-    json_main = [p for p in json_candidates if "_L" not in os.path.basename(p)]
+    json_main = [p for p in json_candidates if "dragen" not in os.path.basename(p)]
     if not json_main:
         raise FileNotFoundError(f"No main .json file (without lane suffix) found in folder {args.input}.")
     fms_json = load_json_file(json_main[0])
