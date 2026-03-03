@@ -387,10 +387,10 @@ def main():
     if args.sample:
         samples = list(args.sample)
     elif args.xsample:
-        all_samples = [sample["sample_name"] for sample in fms_json["samples"]]
+        all_samples = [sample["sample_name"] for sample in fms_json["readsets"]]
         samples = list(set(all_samples).difference(set(args.xsample)))
     else:
-        samples = [sample["sample_name"] for sample in fms_json["samples"]]
+        samples = [sample["sample_name"] for sample in fms_json["readsets"]]
 
     jsonify_run_processing(args.input, fms_json, lanes_json, output, lanes, samples, args.nucleic_acid_type)
 
