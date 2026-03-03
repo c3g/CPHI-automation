@@ -181,7 +181,7 @@ def jsonify_run_processing(input_run_folder, fms_json, lanes_json, output, lanes
                         if readset["library_type"] == "RNASeq":
                             raw_reads_count_flag = rna_raw_reads_count_check(sample_name, raw_reads_count)
 
-                        raw_duplication_rate = run_v.get("qc", {}).get("duplication_rate")
+                        raw_duplication_rate = run_v.get("qc", {}).get("duplicate_rate")
                         raw_duplication_rate_flag = get_flag(raw_duplication_rate)
                         if readset["library_type"] != "RNASeq":
                             raw_duplication_rate_flag = dna_raw_duplication_rate_check(sample_name, raw_duplication_rate)
@@ -297,9 +297,7 @@ def dna_raw_mean_coverage_check(sample, value, tumour):
     if not value:
         ret = "MISSING"
         logger.warning(f"Missing 'mean_coverage' value for {sample} from json.")
-    if float(value)<30 and not tumour:
-        ret = "FAILED"
-    elif float(value)<80 and tumour:
+    if float(value)<30:
         ret = "FAILED"
     else:
         ret = "PASS"
