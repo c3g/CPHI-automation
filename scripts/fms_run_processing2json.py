@@ -88,7 +88,7 @@ def jsonify_run_processing(input_run_folder, fms_json, lanes_json, output, lanes
             "operation_platform": "abacus",
             "project_ext_id": None,
             "project_ext_src": None,
-            "project_name": "MOH-Q",
+            "project_name": "NRGI_CPHI",
             "run_ext_id": fms_json["run_obj_id"],
             "run_ext_src": "FREEZEMAN",
             "run_name": input_run_folder.split("/")[-1],
