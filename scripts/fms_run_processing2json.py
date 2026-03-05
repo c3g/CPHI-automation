@@ -143,46 +143,33 @@ def jsonify_run_processing(input_run_folder, fms_json, lanes_json, output, lanes
                         "sample_ext_id": int(readset["derived_sample_obj_id"]),
                         "sample_ext_src": "FREEZEMAN",
                         "sample_name": sample_name,
-                        "sample_tumour": sample_name.endswith("T"),
                         "readset": []
                         }
                     specimen_json["sample"].append(sample_json)
-                if sample_name.endswith("RT"):
-                    fastq1 = readset["fastq_1"]["final_path"]
-                    fastq2 = readset["fastq_2"]["final_path"]
-                    file_json = [
-                        {
-                            "location_uri": f"abacus://{fastq1}",
-                            "file_name": f"{os.path.basename(fastq1)}",
-                            "file_md5sum": compute_md5(fastq1),
-                            "file_extra_metadata": {"read_type": "R1"},
-                            "file_deliverable": True
-                            },
-                        {
-                            "location_uri": f"abacus://{fastq2}",
-                            "file_name": f"{os.path.basename(fastq2)}",
-                            "file_md5sum": compute_md5(fastq2),
-                            "file_extra_metadata": {"read_type": "R2"},
-                            "file_deliverable": True
-                            }
-                        ]
-                else:
-                    cram = readset["bam"]["final_path"]
-                    crai = readset["bai"]["final_path"]
-                    file_json = [
-                        {
-                            "location_uri": f"abacus://{cram}",
-                            "file_name": f"{os.path.basename(cram)}",
-                            "file_md5sum": compute_md5(cram),
-                            "file_deliverable": True
-                            },
-                        {
-                            "location_uri": f"abacus://{crai}",
-                            "file_name": f"{os.path.basename(crai)}",
-                            "file_md5sum": compute_md5(crai),
-                            "file_deliverable": True
-                            }
-                        ]
+
+                cram = readset["bam"]["final_path"]
+                crai = readset["bai"]["final_path"]
+                dragen_tar = os.path.join(os.path.dirname(os.path.dirname(cram)), f"{sample_name}_{readset["derived_sample_obj_id"]}.dragen_outputs.tar.gz")
+                file_json = [
+                    {
+                        "location_uri": f"abacus://{cram}",
+                        "file_name": f"{os.path.basename(cram)}",
+                        "file_md5sum": compute_md5(cram),
+                        "file_deliverable": True
+                        },
+                    {
+                        "location_uri": f"abacus://{crai}",
+                        "file_name": f"{os.path.basename(crai)}",
+                        "file_md5sum": compute_md5(crai),
+                        "file_deliverable": True
+                        },
+                    {
+                        "location_uri": f"abacus://{dragen_tar}",
+                        "file_name": f"{os.path.basename(dragen_tar)}",
+                        "file_md5sum": compute_md5(cram),
+                        "file_deliverable": True
+                    }
+                    ]
                 for run_v in lane_json["run_validation"]:
                     if run_v.get("sample") == readset_key:
                         raw_reads_count = run_v.get("qc", {}).get("nb_reads")
@@ -211,7 +198,7 @@ def jsonify_run_processing(input_run_folder, fms_json, lanes_json, output, lanes
                         raw_mean_coverage_flag = get_flag(raw_mean_coverage)
                         raw_mean_coverage, raw_mean_coverage_flag = check_na(raw_mean_coverage, raw_mean_coverage_flag)
                         if raw_mean_coverage_flag == "PASS" and readset["library_type"] != "RNASeq":
-                            raw_mean_coverage_flag = dna_raw_mean_coverage_check(sample_name, raw_mean_coverage, lane_mean_coverage)
+                            raw_mean_coverage_flag = dna_raw_mean_coverage_check(sample_name, raw_mean_coverage, lane_mean_coverage)     
                         metric_json = [
                             {
                                 "metric_name": "raw_reads_count",
