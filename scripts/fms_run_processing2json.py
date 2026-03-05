@@ -98,6 +98,14 @@ def jsonify_run_processing(input_run_folder, fms_json, lanes_json, output, lanes
             }
 
     for _, lane_json in lanes_json.items():
+        # calculate average coverage for lane
+        sample_number = 0
+        lane_coverage = 0
+        for run_v in lane_json["run_validation"]:
+            print(run_v)
+            sample_number += 1
+            lane_coverage += run_v.get("alignment", {}).get("mean_coverage")
+        lane_mean_coverage = lane_coverage / sample_number
         for readset_key, readset in lane_json["readsets"].items():
             sample_name = readset["sample_name"]
             if sample_name.startswith("NRGI") and lane_json['lane'] in lanes and sample_name in samples:
@@ -199,7 +207,7 @@ def jsonify_run_processing(input_run_folder, fms_json, lanes_json, output, lanes
                         raw_mean_coverage_flag = get_flag(raw_mean_coverage)
                         raw_mean_coverage, raw_mean_coverage_flag = check_na(raw_mean_coverage, raw_mean_coverage_flag)
                         if raw_mean_coverage_flag == "PASS" and readset["library_type"] != "RNASeq":
-                            raw_mean_coverage_flag = dna_raw_mean_coverage_check(sample_name, raw_mean_coverage, sample_name.endswith("T"))
+                            raw_mean_coverage_flag = dna_raw_mean_coverage_check(sample_name, raw_mean_coverage, lane_mean_coverage)
                         metric_json = [
                             {
                                 "metric_name": "raw_reads_count",
@@ -292,12 +300,12 @@ def get_flag(value, default="PASS", missing="MISSING"):
     """ Get flag for metric """
     return default if value is not None else missing
 
-def dna_raw_mean_coverage_check(sample, value, tumour):
+def dna_raw_mean_coverage_check(sample, value, lane_mean):
     """ Mean Coverage DNA metric check """
     if not value:
         ret = "MISSING"
         logger.warning(f"Missing 'mean_coverage' value for {sample} from json.")
-    if float(value)<30:
+    elif float(lane_mean)<30:
         ret = "FAILED"
     else:
         ret = "PASS"
