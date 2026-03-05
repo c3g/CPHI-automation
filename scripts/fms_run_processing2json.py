@@ -94,6 +94,7 @@ def jsonify_run_processing(input_run_folder, fms_json, lanes_json, output, lanes
             "run_name": input_run_folder.split("/")[-1],
             "run_instrument": "novaseq",
             "run_date": f"{datetime.strptime(fms_json['run_start_date'], '%Y-%m-%d')}",
+            "run_mean_coverage": None,
             "specimen": []
             }
 
@@ -102,10 +103,13 @@ def jsonify_run_processing(input_run_folder, fms_json, lanes_json, output, lanes
         sample_number = 0
         lane_coverage = 0
         for run_v in lane_json["run_validation"]:
-            print(run_v)
             sample_number += 1
             lane_coverage += run_v.get("alignment", {}).get("mean_coverage")
-        lane_mean_coverage = lane_coverage / sample_number
+        lane_mean_coverage = float(lane_coverage / sample_number)
+        json_output["run_mean_coverage"] = lane_mean_coverage
+        print(sample_number)
+        print(lane_coverage)
+        print(lane_mean_coverage)
         for readset_key, readset in lane_json["readsets"].items():
             sample_name = readset["sample_name"]
             if sample_name.startswith("NRGI") and lane_json['lane'] in lanes and sample_name in samples:
