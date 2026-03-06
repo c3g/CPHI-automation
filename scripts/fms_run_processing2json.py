@@ -107,9 +107,6 @@ def jsonify_run_processing(input_run_folder, fms_json, lanes_json, output, lanes
             lane_coverage += run_v.get("alignment", {}).get("mean_coverage")
         lane_mean_coverage = float(lane_coverage / sample_number)
         json_output["run_mean_coverage"] = lane_mean_coverage
-        print(sample_number)
-        print(lane_coverage)
-        print(lane_mean_coverage)
         for readset_key, readset in lane_json["readsets"].items():
             sample_name = readset["sample_name"]
             if sample_name.startswith("NRGI") and lane_json['lane'] in lanes and sample_name in samples:
