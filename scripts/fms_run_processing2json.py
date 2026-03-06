@@ -124,6 +124,8 @@ def jsonify_run_processing(input_run_folder, fms_json, lanes_json, output, lanes
                         "specimen_ext_src": None,
                         "specimen_name": specimen,
                         "specimen_readset": readset,
+                        "specimen_cohort": None,
+                        "specimen_institution": None,
                         "sample": []
                         }
                     json_output["specimen"].append(specimen_json)
