@@ -142,6 +142,7 @@ def jsonify_run_processing(input_run_folder, fms_json, lanes_json, output, lanes
                         "sample_ext_id": int(readset["derived_sample_obj_id"]),
                         "sample_ext_src": "FREEZEMAN",
                         "sample_name": sample_name,
+                        "sample_tumour": False,
                         "readset": []
                         }
                     specimen_json["sample"].append(sample_json)
