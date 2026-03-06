@@ -92,7 +92,7 @@ def jsonify_run_processing(input_run_folder, fms_json, lanes_json, output, lanes
             "run_ext_id": fms_json["run_obj_id"],
             "run_ext_src": "FREEZEMAN",
             "run_name": input_run_folder.split("/")[-1],
-            "run_instrument": "novaseq",
+            "run_instrument": "novaseqx",
             "run_date": f"{datetime.strptime(fms_json['run_start_date'], '%Y-%m-%d')}",
             "run_mean_coverage": None,
             "specimen": []
