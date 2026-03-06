@@ -316,13 +316,13 @@ def rna_raw_reads_count_check(sample, value):
     return ret
 
 def dna_raw_duplication_rate_check(sample, value):
-    """ Dup. Rate (%) DNA metric check """
+    """ Dup. Rate DNA metric check """
     if not value:
         ret = "MISSING"
         logger.warning(f"Missing 'duplication_rate' value for {sample} from json.")
-    elif float(value)>50:
+    elif float(value)>0.5:
         ret = "FAILED"
-    elif float(value)>20:
+    elif float(value)>0.2:
         ret = "WARNING"
     else:
         ret = "PASS"
