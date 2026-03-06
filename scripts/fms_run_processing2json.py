@@ -228,7 +228,7 @@ def jsonify_run_processing(input_run_folder, fms_json, lanes_json, output, lanes
                                 }
                             ]
 
-                readset_name = f"{sample_name}.{lane_json['run']}_{lane_json['lane']}"
+                readset_name = f"{sample_name}_{readset["derived_sample_obj_id"]}_{lane_json['run_obj_id']}_L00{lane_json['lane']}"
                 readset_dict[readset_name] = (specimen, sample_name)
                 # Check if the readset is already in sample_json["readset"]
                 readset_names = [spec["readset_name"] for spec in sample_json["readset"]]
@@ -352,7 +352,6 @@ def compute_md5(file_path, chunk_size=8 * 1024 * 1024):  # 8MB chunks
     except (FileNotFoundError, IOError):
         pass  # Proceed to compute MD5 if .md5 file doesn't exist or can't be read
 
-    print("md5 not found for " + file_path)
     # Compute MD5
     md5 = hashlib.md5()
     with open(file_path, 'rb') as f:
