@@ -170,7 +170,7 @@ def jsonify_run_processing(input_run_folder, fms_json, lanes_json, output, lanes
                         "file_deliverable": True
                     }
                     ]
-                for job in [step for step in lane_json["steps"] if step["step_name"] == "align"]:
+                for job in [step for step in lane_json["steps"]["job_name"] if step["step_name"] == "align"]:
                     if f"dragen_processing.{readset_key}" in job.get("job_name"):
                         job_name = job.get("job_name")
                         cmd_line = job.get("command")
