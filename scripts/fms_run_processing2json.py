@@ -170,7 +170,7 @@ def jsonify_run_processing(input_run_folder, fms_json, lanes_json, output, lanes
                         "file_deliverable": True
                     }
                     ]
-                for job in [step for step in lane_json["steps"] if step["step_name"] == "align"]:
+                for job in next(step["jobs"] for step in lane_json["steps"] if step["step_name"] == "align"):
                     if f"dragen_processing.{readset_key}" in job.get("job_name"):
                         job_name = job.get("job_name")
                         cmd_line = job.get("command")
@@ -361,7 +361,7 @@ def get_reference(command):
     """ Parse reference used from dragen command """
     ref_dir = re.search(r"--ref-dir \S*", command)[0].split(" ")[1]
     ref_name = os.path.basename(ref_dir).split("-")[0]
-    ref_version = os.path.basename(ref_dir).split("-")[1]
+    ref_version = re.sub(f"{ref_name}-", '', os.path.basename(ref_dir))
     annotation_assembly = re.search(r"--variant-annotation-assembly \S*", command)[0].split(" ")[1]
 
     return ref_name, ref_version, annotation_assembly
