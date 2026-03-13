@@ -170,6 +170,21 @@ def jsonify_run_processing(input_run_folder, fms_json, lanes_json, output, lanes
                         "file_deliverable": True
                     }
                     ]
+                for job in [step for step in lane_json["steps"] if step["step_name"] == "align"]:
+                    if f"dragen_processing.{readset_key}" in job.get("job_name"):
+                        job_name = job.get("job_name")
+                        cmd_line = job.get("command")
+                        ref_name, ref_version, ref_alias = get_reference(cmd_line)
+
+                        operation_json = [
+                            {
+                                "operation_name": job_name,
+                                "operation_cmd_line": cmd_line,
+                                "reference_name": ref_name,
+                                "reference_alias": ref_alias,
+                                "reference_version": ref_version
+                            }
+                        ]
                 for run_v in lane_json["run_validation"]:
                     if run_v.get("sample") == readset_key:
                         raw_reads_count = run_v.get("qc", {}).get("nb_reads")
@@ -252,7 +267,8 @@ def jsonify_run_processing(input_run_folder, fms_json, lanes_json, output, lanes
                         "readset_sequencing_type": f"{lane_json['sequencing_method']}",
                         "readset_quality_offset": "33",
                         "file": file_json,
-                        "metric": metric_json
+                        "metric": metric_json,
+                        "operation": operation_json
                         }
                     sample_json["readset"].append(readset_json)
 
@@ -340,6 +356,15 @@ def median_insert_size_check(sample, value):
     else:
         ret = "PASS"
     return ret
+
+def get_reference(command):
+    """ Parse reference used from dragen command """
+    ref_dir = re.search(r"--ref-dir \S*", command)[0].split(" ")[1]
+    ref_name = os.path.basename(ref_dir).split("-")[0]
+    ref_version = os.path.basename(ref_dir).split("-")[1]
+    annotation_assembly = re.search(r"--variant-annotation-assembly \S*", command)[0].split(" ")[1]
+
+    return ref_name, ref_version, annotation_assembly
 
 def compute_md5(file_path, chunk_size=8 * 1024 * 1024):  # 8MB chunks
     """Compute or retrieve MD5 checksum of a file using EAFP style."""
