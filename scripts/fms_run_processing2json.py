@@ -166,7 +166,7 @@ def jsonify_run_processing(input_run_folder, fms_json, lanes_json, output, lanes
                     {
                         "location_uri": f"abacus://{dragen_tar}",
                         "file_name": f"{os.path.basename(dragen_tar)}",
-                        "file_md5sum": compute_md5(cram),
+                        "file_md5sum": compute_md5(dragen_tar),
                         "file_deliverable": True
                     }
                     ]
