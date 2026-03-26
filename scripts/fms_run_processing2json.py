@@ -379,6 +379,7 @@ def compute_md5(file_path, chunk_size=8 * 1024 * 1024):  # 8MB chunks
 
     # Compute MD5
     md5 = hashlib.md5()
+    print(file_path)
     with open(file_path, 'rb') as f:
         while chunk := f.read(chunk_size):
             md5.update(chunk)
