@@ -208,9 +208,7 @@ def jsonify_run_processing_transfer(batch_file, source, destination, output, ope
 
             elif ".tar.gz" in src_path:
                 try:
-                    print(path_d)
                     readset_name = f"{path_d[2].replace('.dragen_outputs.tar.gz', '')}"
-                    print(readset_name)
                 except IndexError:
                     continue
 

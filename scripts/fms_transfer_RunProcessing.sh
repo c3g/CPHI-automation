@@ -54,6 +54,7 @@ runfolder=$(jq -r '.run_name' "$run_processing_json")
 run_id=$(jq -r '.run_ext_id' "$run_processing_json")
 
 TRANSFER_DIR='/lb/project/mugqic/projects/mjaniak/PCGL/cphi_project_tracking/transfer_cphi'
+TRANSFER_JSON_DIR='/lb/project/mugqic/projects/mjaniak/PCGL/cphi_project_tracking/transfer_jsons'
 TIMESTAMP=$(date +%FT%H.%M.%S)
 LOGFILE="${runfolder}_${TIMESTAMP}_${destination}_transfer.log"
 LISTFILE="${runfolder}_${TIMESTAMP}_${destination}_transfer.list"
@@ -98,7 +99,7 @@ if [ $? -eq 0  ]; then
     TRANSFER_JSON="$TRANSFER_JSON_DIR/${LISTFILE/.list/.json}"
     module unload mugqic/globus-cli/3.24.0
     timestamp_end=$(date "+%Y-%m-%dT%H.%M.%S")
-    ~/CPHI-automation/scripts/transfer2json.json --input $TEMP/$LISTFILE_FULLPATH --source "abacus" --destination $destination --output $TRANSFER_JSON --operation_cmd_line "globus transfer --sync-level mtime --jmespath 'task_id' --format=UNIX --submission-id $sub_id --label $runfolder --batch $TEMP/$LISTFILE $ABA_EP $DEST_EP" --start $timestamp_start --stop $timestamp_end
+    ~/CPHI-automation/scripts/transfer2json.py --input $TRANSFER_DIR/$LISTFILE --source "abacus" --destination $destination --output $TRANSFER_JSON --operation_cmd_line "globus transfer --sync-level mtime --jmespath 'task_id' --format=UNIX --submission-id ${sub_id} --label $runfolder --batch $TRANSFER_DIR/$LISTFILE $ABA_EP $DEST_EP" --start $timestamp_start --stop $timestamp_end
     echo "Ingesting transfer $TRANSFER_JSON..."
     pt-cli ingest transfer --input-json $TRANSFER_JSON
 else

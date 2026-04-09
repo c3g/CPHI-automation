@@ -149,7 +149,7 @@ def jsonify_run_processing(input_run_folder, fms_json, lanes_json, output, lanes
 
                 cram = readset["bam"]["final_path"]
                 crai = readset["bai"]["final_path"]
-                dragen_tar = os.path.join(os.path.dirname(os.path.dirname(cram)), f"{sample_name}_{readset["derived_sample_obj_id"]}.dragen_outputs.tar.gz")
+                dragen_tar = os.path.join(os.path.dirname(os.path.dirname(cram)), f"{sample_name}_{readset['derived_sample_obj_id']}.dragen_outputs.tar.gz")
                 file_json = [
                     {
                         "location_uri": f"abacus://{cram}",
@@ -243,7 +243,7 @@ def jsonify_run_processing(input_run_folder, fms_json, lanes_json, output, lanes
                                 }
                             ]
 
-                readset_name = f"{sample_name}_{readset["derived_sample_obj_id"]}_{lane_json['run_obj_id']}_L00{lane_json['lane']}"
+                readset_name = f"{sample_name}_{readset['derived_sample_obj_id']}_{lane_json['run_obj_id']}_L00{lane_json['lane']}"
                 readset_dict[readset_name] = (specimen, sample_name)
                 # Check if the readset is already in sample_json["readset"]
                 readset_names = [spec["readset_name"] for spec in sample_json["readset"]]
@@ -379,7 +379,6 @@ def compute_md5(file_path, chunk_size=8 * 1024 * 1024):  # 8MB chunks
 
     # Compute MD5
     md5 = hashlib.md5()
-    print(file_path)
     with open(file_path, 'rb') as f:
         while chunk := f.read(chunk_size):
             md5.update(chunk)

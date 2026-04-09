@@ -60,10 +60,10 @@ module use "$MUGQIC_INSTALL_HOME/modulefiles" "$MUGQIC_INSTALL_HOME_DEV/modulefi
 
 ##################################################
 # Initialization
-module purge
+#module purge
 # module load mugqic/python/3.12.2
 
-source ~/project_tracking_cli/venv/bin/activate
+#source ~/project_tracking_cli/venv/bin/activate
 
 path=/lb/project/mugqic/projects/mjaniak/PCGL/cphi_project_tracking #TMP
 
@@ -97,5 +97,5 @@ else
 fi
 
 # transfer cram, crais, and dragen tars to CPHI collection on SD4H
-#nohup ~/moh_automation/fms_transfer_RunProcessing.sh -r "$run_processing_json" -d "$destination" > "${run_processing_json/.json/_${destination}_${TIMESTAMP}_transfer.log}" 2>&1 &
 echo "Transfer started towards $destination. See log file ${run_processing_json/.json/_${destination}_${TIMESTAMP}_transfer.log}"
+~/CPHI-automation/scripts/fms_transfer_RunProcessing.sh -r "$run_processing_json" -d "$destination" > "${run_processing_json/.json/_${destination}_${TIMESTAMP}_transfer.log}"
