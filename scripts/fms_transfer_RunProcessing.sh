@@ -3,21 +3,25 @@
 THIS_SCRIPT=$(basename "$0")
 
 usage() {
-    echo "script usage: $THIS_SCRIPT -h [-r run_processing_json] [-d destination]"
+    echo "script usage: $THIS_SCRIPT -h [-r run_processing_json] [-d destination] [-x xsample]"
     echo "Usage:"
-    echo " -h                       Display this help message."
-    echo " -r <run_processing_json>  Run Processing json."
-    echo " -d <destination>        Destination for the transfer."
+    echo " -h                           Display this help message."
+    echo " -r <run_processing_json>     Run Processing json."
+    echo " -d <destination>             Destination for the transfer."
+    echo " -x <xsample>                 Sample Name(s) to be EXCLUDED (as they appear in the json file from Freezeman) (default: none)."
     exit 1
     }
 
-while getopts 'hr:d:' OPTION; do
+while getopts 'hr:d::x:' OPTION; do
     case "$OPTION" in
         r)
             run_processing_json="$OPTARG"
             ;;
         d)
             destination="$OPTARG"
+            ;;
+        x)
+            xsample+=("$OPTARG")
             ;;
         h)
             usage
@@ -73,15 +77,19 @@ jq -r '
     select(.location_uri != null) | 
     "\($sample_name) \($readset_lane) \(.location_uri | sub("^abacus://"; ""))"
 ' "$run_processing_json" | while read -r sample_name readset_lane file; do
-    file_basename=$(basename "$file")
-    if [[ $file == *.dragen_outputs.tar.gz && "$file" != *"${run_id}_L00${readset_lane}.dragen_outputs.tar.gz" ]]; then
-        file_basename=$(basename "$file" .dragen_outputs.tar.gz)
-        new_filename=${file_basename}_${run_id}_L00${readset_lane}.dragen_outputs.tar.gz
-        echo "$file $DEST_LOC/$sample_name/$new_filename" >> "$TRANSFER_DIR/$LISTFILE"
-        echo "$file,$sample_name/$new_filename" >> "$TRANSFER_DIR/$LOGFILE"
+    if [[ "$xsample" == *"$sample_name"* ]]; then
+        echo "Skipping ${sample_name}..."
     else
-        echo "$file $DEST_LOC/$sample_name/$file_basename" >> "$TRANSFER_DIR/$LISTFILE"
-        echo "$file,$sample_name/$file_basename" >> "$TRANSFER_DIR/$LOGFILE"
+        file_basename=$(basename "$file")
+        if [[ $file == *.dragen_outputs.tar.gz && "$file" != *"${run_id}_L00${readset_lane}.dragen_outputs.tar.gz" ]]; then
+            file_basename=$(basename "$file" .dragen_outputs.tar.gz)
+            new_filename=${file_basename}_${run_id}_L00${readset_lane}.dragen_outputs.tar.gz
+            echo "$file $DEST_LOC/$sample_name/$new_filename" >> "$TRANSFER_DIR/$LISTFILE"
+            echo "$file,$sample_name/$new_filename" >> "$TRANSFER_DIR/$LOGFILE"
+        else
+            echo "$file $DEST_LOC/$sample_name/$file_basename" >> "$TRANSFER_DIR/$LISTFILE"
+            echo "$file,$sample_name/$file_basename" >> "$TRANSFER_DIR/$LOGFILE"
+        fi
     fi
 done
 

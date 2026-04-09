@@ -49,10 +49,10 @@ fi
 if declare -p sample >&/dev/null; then
     run_processing2json_args="${run_processing2json_args} -s ${sample[*]}"
 fi
+transfer_args=""
 if declare -p xsample >&/dev/null; then
-    run_processing2json_args="${run_processing2json_args} -x ${xsample[*]}"
+    transfer_args="-x ${xsample[*]}"
 fi
-
 
 export MUGQIC_INSTALL_HOME=/cvmfs/soft.mugqic/CentOS6
 export MUGQIC_INSTALL_HOME_DEV=/lb/project/mugqic/analyste_dev
@@ -98,4 +98,4 @@ fi
 
 # transfer cram, crais, and dragen tars to CPHI collection on SD4H
 echo "Transfer started towards $destination. See log file ${run_processing_json/.json/_${destination}_${TIMESTAMP}_transfer.log}"
-~/CPHI-automation/scripts/fms_transfer_RunProcessing.sh -r "$run_processing_json" -d "$destination" > "${run_processing_json/.json/_${destination}_${TIMESTAMP}_transfer.log}"
+~/CPHI-automation/scripts/fms_transfer_RunProcessing.sh -r "$run_processing_json" -d "$destination" "$transfer_args" > "${run_processing_json/.json/_${destination}_${TIMESTAMP}_transfer.log}"
