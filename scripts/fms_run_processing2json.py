@@ -71,7 +71,7 @@ def load_json_file(file_path):
         logger.error(f"Error decoding JSON file: {file_path}")
     return None
 
-def jsonify_run_processing(input_run_folder, fms_json, lanes_json, output, lanes, samples, nucleic_acid_type):
+def jsonify_run_processing(input_run_folder, fms_json, lanes_json, output, lanes, samples, xsamples, nucleic_acid_type):
     """
     Converts the Run Processing run validation file to a json file for project tracking database.
     Args:
@@ -155,19 +155,19 @@ def jsonify_run_processing(input_run_folder, fms_json, lanes_json, output, lanes
                         "location_uri": f"abacus://{cram}",
                         "file_name": f"{os.path.basename(cram)}",
                         "file_md5sum": compute_md5(cram),
-                        "file_deliverable": True
+                        "file_deliverable": False if sample_name in xsamples else True
                         },
                     {
                         "location_uri": f"abacus://{crai}",
                         "file_name": f"{os.path.basename(crai)}",
                         "file_md5sum": compute_md5(crai),
-                        "file_deliverable": True
+                        "file_deliverable": False if sample_name in xsamples else True
                         },
                     {
                         "location_uri": f"abacus://{dragen_tar}",
                         "file_name": f"{os.path.basename(dragen_tar)}",
                         "file_md5sum": compute_md5(dragen_tar),
-                        "file_deliverable": True
+                        "file_deliverable": False if sample_name in xsamples else True
                     }
                     ]
                 for job in next(step["jobs"] for step in lane_json["steps"] if step["step_name"] == "align"):
@@ -266,6 +266,7 @@ def jsonify_run_processing(input_run_folder, fms_json, lanes_json, output, lanes
                         "readset_adapter2": f"{readset['barcodes'][0]['ADAPTERi5']}",
                         "readset_sequencing_type": f"{lane_json['sequencing_method']}",
                         "readset_quality_offset": "33",
+                        "readset_state": "INVALID" if sample_name in xsamples else "VALID",
                         "file": file_json,
                         "metric": metric_json,
                         "operation": operation_json
@@ -402,13 +403,14 @@ def main():
 
     if args.sample:
         samples = list(args.sample)
-    elif args.xsample:
-        all_samples = [sample["sample_name"] for sample in fms_json["samples"]]
-        samples = list(set(all_samples).difference(set(args.xsample)))
     else:
         samples = [sample["sample_name"] for sample in fms_json["samples"]]
+    if args.xsample:
+        xsamples = list(args.xsample)
+    else:
+        xsamples = None
 
-    jsonify_run_processing(args.input, fms_json, lanes_json, output, lanes, samples, args.nucleic_acid_type)
+    jsonify_run_processing(args.input, fms_json, lanes_json, output, lanes, samples, xsamples, args.nucleic_acid_type)
 
 if __name__ == '__main__':
     main()

@@ -43,14 +43,15 @@ while getopts 'hr:d::l::s::x:' OPTION; do
 done
 
 run_processing2json_args=""
+transfer_args=""
 if declare -p lane >&/dev/null; then
     run_processing2json_args="${run_processing2json_args} -l ${lane[*]}"
 fi
 if declare -p sample >&/dev/null; then
     run_processing2json_args="${run_processing2json_args} -s ${sample[*]}"
 fi
-transfer_args=""
 if declare -p xsample >&/dev/null; then
+    run_processing2json_args="${run_processing2json_args} -x ${xsample[*]}"
     transfer_args="-x ${xsample[*]}"
 fi
 
