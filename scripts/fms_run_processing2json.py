@@ -408,7 +408,7 @@ def main():
     if args.xsample:
         xsamples = list(args.xsample)
     else:
-        xsamples = None
+        xsamples = []
 
     jsonify_run_processing(args.input, fms_json, lanes_json, output, lanes, samples, xsamples, args.nucleic_acid_type)
 
