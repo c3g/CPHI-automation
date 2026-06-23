@@ -51,7 +51,7 @@ def execute(base_url,
             data = json.loads(data)
 
             print("Submitting json file to Freezeman", iterfile)
-            response = requests.post(args.url + DATASETS_ENDPOINT,
+            response = requests.post(args.url + DATASETS_ENDPOINT + "?replace=True",
                                     json = data,
                                     headers = headers,
                                     verify = cert
