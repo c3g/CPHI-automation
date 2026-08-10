@@ -107,6 +107,7 @@ if [ $? -eq 0  ]; then
     TRANSFER_JSON="$TRANSFER_JSON_DIR/${LISTFILE/.list/.json}"
     module unload mugqic/globus-cli/3.24.0
     timestamp_end=$(date "+%Y-%m-%dT%H.%M.%S")
+    module load mugqic/python/3.12.2
     ~/CPHI-automation/scripts/transfer2json.py --input $TRANSFER_DIR/$LISTFILE --source "abacus" --destination $destination --output $TRANSFER_JSON --operation_cmd_line "globus transfer --sync-level mtime --jmespath 'task_id' --format=UNIX --submission-id ${sub_id} --label $runfolder --batch $TRANSFER_DIR/$LISTFILE $ABA_EP $DEST_EP" --start $timestamp_start --stop $timestamp_end
     echo "Ingesting transfer $TRANSFER_JSON..."
     pt-cli ingest transfer --input-json $TRANSFER_JSON
