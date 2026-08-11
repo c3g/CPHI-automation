@@ -62,7 +62,7 @@ def parse_arguments():
         '-x',
         '--xsample',
         nargs='+',
-        help="Ignores sample(s) provided for json creation."
+        help="Labels sample(s) provided as invalid for json creation."
         )
     return parser.parse_args()
 
@@ -88,7 +88,6 @@ def jsonify_run_processing(input_run_folder, fms_json, lanes_json, output, lanes
         samples (list): List of samples to consider.
         nucleic_acid_type (str): Nucleic Acid type to consider.
     """
-    logger.info(f"samples INVALID: {xsamples}; samples ON HOLD: {hsamples}")
     readset_dict = {}
     sample_dict = {}
     json_output = {
