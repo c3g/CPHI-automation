@@ -213,7 +213,13 @@ def jsonify_run_processing(input_run_folder, fms_json, lanes_json, output, lanes
                         raw_mean_coverage_flag = get_flag(raw_mean_coverage)
                         raw_mean_coverage, raw_mean_coverage_flag = check_na(raw_mean_coverage, raw_mean_coverage_flag)
                         if raw_mean_coverage_flag == "PASS" and readset["library_type"] != "RNASeq":
-                            raw_mean_coverage_flag = dna_raw_mean_coverage_check(sample_name, raw_mean_coverage, lane_mean_coverage)     
+                            raw_mean_coverage_flag = dna_raw_mean_coverage_check(sample_name, raw_mean_coverage, lane_mean_coverage)
+
+                        sex_concordance = run_v.get("alignment", {}).get("sex_concordance")
+                        sex_concordance_flag = sex_concordance_check(sample_name, sex_concordance)
+
+                        other_sample_match = run_v.get("qc", {}).get("other_snp_array_matches")
+                        other_sample_match_flag = sample_match_check(sample_name, other_sample_match)
                         metric_json = [
                             {
                                 "metric_name": "raw_reads_count",
@@ -240,7 +246,17 @@ def jsonify_run_processing(input_run_folder, fms_json, lanes_json, output, lanes
                                 "metric_name": "raw_mean_coverage",
                                 "metric_value": raw_mean_coverage,
                                 "metric_flag": raw_mean_coverage_flag
-                                }
+                                },
+                            {
+                                "metric_name": "sex_concordance",
+                                "metric_value": sex_concordance,
+                                "metric_flag": sex_concordance_flag
+                                },
+                            {
+                                "metric_name": "other_sample_match",
+                                "metric_value": other_sample_match,
+                                "metric_flag": other_sample_match_flag
+                            }
                             ]
 
                 readset_name = f"{sample_name}_{readset['derived_sample_obj_id']}_{lane_json['run_obj_id']}_L00{lane_json['lane']}"
@@ -357,6 +373,30 @@ def median_insert_size_check(sample, value):
     else:
         ret = "PASS"
     return ret
+
+def sex_concordance_check(sample, value):
+    """ Sex concordance (true or false) check """
+    if not value:
+        ret = "MISSING"
+        logger.warning(f"Missing 'sex concordance' value for {sample} from json.")
+    if value=="?":
+        ret = "WARNING"
+    if value == "false":
+        ret = "FAILED"
+    else:
+        ret = "PASS"
+    return ret
+
+def sample_match_check(sample, value):
+    """ Check if sample matches other SNP arrays """
+    if not value:
+        ret = "MISSING"
+        logger.warning(f"Missing 'snp array match' value for {sample} from json.")
+    if len(value) == 0:
+        ret = "PASS"
+    else:
+        ret = "FAIL"
+    return ret 
 
 def get_reference(command):
     """ Parse reference used from dragen command """

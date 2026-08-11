@@ -23,7 +23,7 @@ def parse_arguments():
         '-i',
         '--input',
         required=True,
-        help="Folder containing the transfer jsons to be summarized."
+        help="Folder containing the project tracking and transfer jsons to be summarized."
         )
     parser.add_argument(
         '-o',
@@ -44,9 +44,16 @@ def load_json_file(file_path):
         logger.error(f"Error decoding JSON file: {file_path}")
     return None
 
+def summarize_runs(pt_jsons):
+    """
+    Create dictionary including all sequenced samples.
+    """
+
+
+
 def summarize_transfers(transfer_jsons, output):
     """
-    Creates a table summarizing samples that have been transferred.
+    Creates a table summarizing all samples, including transferred status.
     """
 
     transferred_samples = []
@@ -93,10 +100,14 @@ def main():
 
     output = args.output or f"{os.path.basename(args.input)}.json"
 
-    transfer_json_files = glob.glob(os.path.join(args.input, "*sd4h_transfer.json"))
+    pt_json_files = glob.glob(os.path.join(args.input, "pt_jsons", "*novaseqx.json"))
+    pt_jsons = {os.path.basename(file): load_json_file(file) for file in pt_json_files}
+
+    transfer_json_files = glob.glob(os.path.join(args.input, "transfer_jsons", "*sd4h_transfer.json"))
     transfer_jsons = {os.path.basename(file): load_json_file(file) for file in transfer_json_files}
 
-    summarize_transfers(transfer_jsons, output)
+    sequenced_samples = summarize_runs(pt_jsons)
+    summarize_transfers(transfer_jsons, sequenced_samples, output)
 
 if __name__ == '__main__':
     main()
