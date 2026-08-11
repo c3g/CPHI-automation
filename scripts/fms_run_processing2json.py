@@ -58,6 +58,12 @@ def parse_arguments():
         nargs='+',
         help="Ignores sample(s) provided for json creation."
         )
+    group.add_argument(
+        '-hs',
+        '--hsample',
+        nargs='+',
+        help="Labels sample(s) provided as on hold for json creation."
+        )
     return parser.parse_args()
 
 def load_json_file(file_path):
@@ -71,7 +77,7 @@ def load_json_file(file_path):
         logger.error(f"Error decoding JSON file: {file_path}")
     return None
 
-def jsonify_run_processing(input_run_folder, fms_json, lanes_json, output, lanes, samples, xsamples, nucleic_acid_type):
+def jsonify_run_processing(input_run_folder, fms_json, lanes_json, output, lanes, samples, xsamples, hsamples, nucleic_acid_type):
     """
     Converts the Run Processing run validation file to a json file for project tracking database.
     Args:
@@ -270,6 +276,7 @@ def jsonify_run_processing(input_run_folder, fms_json, lanes_json, output, lanes
                     for fms_s in fms_json["samples"]:
                         if fms_s.get("sample_name") == sample_name:
                             library_kit = fms_s["library_kit"]
+                    
                     readset_json = {
                         "experiment_sequencing_technology": None,
                         "experiment_type": f"{readset['library_type']}",
@@ -282,7 +289,7 @@ def jsonify_run_processing(input_run_folder, fms_json, lanes_json, output, lanes
                         "readset_adapter2": f"{readset['barcodes'][0]['ADAPTERi5']}",
                         "readset_sequencing_type": f"{lane_json['sequencing_method']}",
                         "readset_quality_offset": "33",
-                        "readset_state": "INVALID" if sample_name in xsamples else "VALID",
+                        "readset_state": "INVALID" if sample_name in xsamples else "ON HOLD" if sample_name in hsamples else "VALID",
                         "file": file_json,
                         "metric": metric_json,
                         "operation": operation_json
@@ -444,8 +451,12 @@ def main():
         xsamples = list(args.xsample)
     else:
         xsamples = []
+    if args.hsample:
+        hsamples = list(args.hsample)
+    else:
+        hsamples = []
 
-    jsonify_run_processing(args.input, fms_json, lanes_json, output, lanes, samples, xsamples, args.nucleic_acid_type)
+    jsonify_run_processing(args.input, fms_json, lanes_json, output, lanes, samples, xsamples, hsamples, args.nucleic_acid_type)
 
 if __name__ == '__main__':
     main()
