@@ -161,19 +161,19 @@ def jsonify_run_processing(input_run_folder, fms_json, lanes_json, output, lanes
                         "location_uri": f"abacus://{cram}",
                         "file_name": f"{os.path.basename(cram)}",
                         "file_md5sum": compute_md5(cram),
-                        "file_deliverable": False if sample_name in xsamples else True
+                        "file_deliverable": False if sample_name in (xsamples or hsamples) else True
                         },
                     {
                         "location_uri": f"abacus://{crai}",
                         "file_name": f"{os.path.basename(crai)}",
                         "file_md5sum": compute_md5(crai),
-                        "file_deliverable": False if sample_name in xsamples else True
+                        "file_deliverable": False if sample_name in xsamples or hsamples else True
                         },
                     {
                         "location_uri": f"abacus://{dragen_tar}",
                         "file_name": f"{os.path.basename(dragen_tar)}",
                         "file_md5sum": compute_md5(dragen_tar),
-                        "file_deliverable": False if sample_name in xsamples else True
+                        "file_deliverable": False if sample_name in xsamples or hsamples else True
                     }
                     ]
                 for job in next(step["jobs"] for step in lane_json["steps"] if step["step_name"] == "align"):
