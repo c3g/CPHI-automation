@@ -2,7 +2,7 @@
 set -e -o pipefail
 
 usage() {
-    echo "script usage: ProjectTracking_RunProcessing.sh -h [-r runfolder] [-l lane] [-s sample] [-x xsample]"
+    echo "script usage: ProjectTracking_RunProcessing.sh -h [-r runfolder] [-l lane] [-s sample] [-x xsample] [-hs hsample]"
     echo "Usage:"
     echo " -h                               Display this help message."
     echo " -r <runfolder>                   RunFolder found in abacus under /lb/robot/research/freezeman-processing/<sequencer>/<year>/<runfolder>."

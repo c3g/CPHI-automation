@@ -45,6 +45,12 @@ def parse_arguments():
         default=["1", "2", "3", "4", "5", "6", "7", "8"],
         help="Only considers lane(s) provided for json creation."
         )
+    group.add_argument(
+        '-hs',
+        '--hsample',
+        nargs='+',
+        help="Labels sample(s) provided as on hold for json creation."
+        )
     group = parser.add_mutually_exclusive_group()
     group.add_argument(
         '-s',
@@ -57,12 +63,6 @@ def parse_arguments():
         '--xsample',
         nargs='+',
         help="Ignores sample(s) provided for json creation."
-        )
-    group.add_argument(
-        '-hs',
-        '--hsample',
-        nargs='+',
-        help="Labels sample(s) provided as on hold for json creation."
         )
     return parser.parse_args()
 
