@@ -379,9 +379,9 @@ def sex_concordance_check(sample, value):
     if not value:
         ret = "MISSING"
         logger.warning(f"Missing 'sex concordance' value for {sample} from json.")
-    if value=="?":
+    elif value=="?":
         ret = "WARNING"
-    if value == "false":
+    elif value == "false":
         ret = "FAILED"
     else:
         ret = "PASS"
@@ -389,14 +389,11 @@ def sex_concordance_check(sample, value):
 
 def sample_match_check(sample, value):
     """ Check if sample matches other SNP arrays """
-    if not value:
-        ret = "MISSING"
-        logger.warning(f"Missing 'snp array match' value for {sample} from json.")
     if len(value) == 0:
         ret = "PASS"
     else:
         ret = "FAIL"
-    return ret 
+    return ret
 
 def get_reference(command):
     """ Parse reference used from dragen command """
