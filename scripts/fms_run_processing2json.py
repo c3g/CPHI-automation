@@ -45,7 +45,7 @@ def parse_arguments():
         default=["1", "2", "3", "4", "5", "6", "7", "8"],
         help="Only considers lane(s) provided for json creation."
         )
-    group.add_argument(
+    parser.add_argument(
         '-hs',
         '--hsample',
         nargs='+',
