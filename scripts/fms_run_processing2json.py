@@ -377,10 +377,8 @@ def median_insert_size_check(sample, value):
 def sex_concordance_check(sample, value):
     """ Sex concordance (true or false) check """
     if not value:
-        ret = "MISSING"
-        logger.warning(f"Missing 'sex concordance' value for {sample} from json.")
-    elif value=="?":
         ret = "WARNING"
+        logger.warning(f"Missing 'sex concordance' value for {sample} from json.")
     elif value == "false":
         ret = "FAILED"
     else:
