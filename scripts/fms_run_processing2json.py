@@ -390,7 +390,7 @@ def sample_match_check(sample, value):
     if len(value) == 0:
         ret = "PASS"
     else:
-        ret = "FAIL"
+        ret = "FAILED"
     return ret
 
 def get_reference(command):
