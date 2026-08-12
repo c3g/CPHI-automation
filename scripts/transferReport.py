@@ -86,7 +86,7 @@ def summarize_runs(pt_jsons, transfer_jsons, output):
         
     headers = sequenced_samples[0].keys()
 
-    with open(output, "w") as f:
+    with open(f"{output}.tsv", "w") as f:
         writer = csv.DictWriter(f, fieldnames=headers, delimiter="\t")
         writer.writeheader()
         writer.writerows(sequenced_samples)
@@ -118,17 +118,10 @@ def summarize_transfers(transfer_jsons, output):
                 }
             transferred_samples[f"{sample_name}_{readset_id}"] = sample_data
 
-    # headers = list(next(iter(transferred_samples.values())).keys())
-    
-    #with open(output, "w") as f:
-    #    writer = csv.DictWriter(f, fieldnames=headers, delimiter="\t")
-    #    writer.writeheader()
-    #    writer.writerows(transferred_samples)
-
     monthly_counts = Counter(d["transfer_date"][:7] for d in transferred_samples.values())
     counts = dict(sorted(monthly_counts.items()))
 
-    with open(f"{output}_summary.tsv", "w") as f:
+    with open(f"{output}_transfer_summary.tsv", "w") as f:
         writer = csv.writer(f, delimiter="\t")
         writer.writerow(["month", "samples_transferred"])
         for key, value in counts.items():
@@ -141,7 +134,7 @@ def main():
     """ Main """
     args = parse_arguments()
 
-    output = args.output or f"{os.path.basename(args.input)}.json"
+    output = args.output
 
     pt_json_files = glob.glob(os.path.join(args.input, "pt_jsons", "*novaseqx.json"))
     pt_jsons = {os.path.basename(file): load_json_file(file) for file in pt_json_files}

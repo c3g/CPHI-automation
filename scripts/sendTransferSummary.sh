@@ -20,20 +20,21 @@ REPORT_PATH=/lb/project/mugqic/projects/mjaniak/PCGL/cphi_project_tracking/summa
 TIMESTAMP=$(date '+%Y-%m-%d')
 
 module purge && module load mugqic/python/3.12.2
-TOTAL=$(~/CPHI-automation/scripts/transferReport.py -i ${TRANSFER_PATH} -o ${REPORT_PATH}/CPHI_NRGI_transferred_${TIMESTAMP}) 
+TOTAL_TRANSFERRED=$(~/CPHI-automation/scripts/transferReport.py -i ${TRANSFER_PATH} -o ${REPORT_PATH}/NRGI_CPHI_processed_${TIMESTAMP}) 
+TOTAL_PROCESSED=$(tail -n +2 ${REPORT_PATH}/NRGI_CPHI_processed_${TIMESTAMP}.tsv | wc -l)
 
-SUMMARY=$(tail -n 1 ${REPORT_PATH}/CPHI_NRGI_transferred_${TIMESTAMP}_summary.tsv | tr -d '\r')
+SUMMARY=$(tail -n 1 ${REPORT_PATH}/NRGI_CPHI_processed_${TIMESTAMP}_transfer_summary.tsv | tr -d '\r')
 
 module unload mugqic/python/3.12.2
 
-echo """Weekly update for project CPHI_NRGI.
-As of ${TIMESTAMP} a total of ${TOTAL} samples have been transferred. 
+echo """Weekly update for project NRGI_CPHI.
+As of ${TIMESTAMP} a total of ${TOTAL_PROCESSED} samples have been processed. Of those, a total of ${TOTAL_TRANSFERRED} have been transferred.
 
 Number of samples transferred during most recent month (may be ongoing):
 "${SUMMARY}"
 
-A file detailing all samples transferred so far and a summary by month are attached to this email.                                                        
+A file detailing all samples processed so far and a summary by month are attached to this email.                                                        
                                                         
-This is an automated email, please do not respond.""" | mailx -s "CPHI_NRGI weekly report ${TIMESTAMP}" -a ${REPORT_PATH}/CPHI_NRGI_transferred_${TIMESTAMP}_summary.tsv -a ${REPORT_PATH}/CPHI_NRGI_transferred_${TIMESTAMP}.tsv -r abacus.genome@mail.mcgill.ca "mareike.janiak@computationalgenomics.ca" "jose.galvezlopez@mcgill.ca" "antoine.paccard@mcgill.ca"
+This is an automated email, please do not respond.""" | mailx -s "NRGI_CPHI weekly report ${TIMESTAMP}" -a ${REPORT_PATH}/NRGI_CPHI_processed_${TIMESTAMP}_transfer_summary.tsv -a ${REPORT_PATH}/NRGI_CPHI_processed_${TIMESTAMP}.tsv -r abacus.genome@mail.mcgill.ca "mareike.janiak@computationalgenomics.ca" "jose.galvezlopez@mcgill.ca" "antoine.paccard@mcgill.ca"
 
 echo "notification sent"
