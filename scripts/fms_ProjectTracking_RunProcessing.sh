@@ -2,7 +2,7 @@
 set -e -o pipefail
 
 usage() {
-    echo "script usage: ProjectTracking_RunProcessing.sh -h [-r runfolder] [-l lane] [-s sample] [-x xsample]"
+    echo "script usage: ProjectTracking_RunProcessing.sh -h [-r runfolder] [-l lane] [-s sample] [-x xsample] [-hs hsample]"
     echo "Usage:"
     echo " -h                               Display this help message."
     echo " -r <runfolder>                   RunFolder found in abacus under /lb/robot/research/freezeman-processing/<sequencer>/<year>/<runfolder>."
@@ -10,10 +10,11 @@ usage() {
     echo " -l <lane>                        Lane(s) to be ingested (default: all)."
     echo " -s <sample>                      Sample Name(s) (as they appear in the json file from Freezeman) (default: all)."
     echo " -x <xsample>                     Sample Name(s) to be EXCLUDED (as they appear in the json file from Freezeman) (default: none)."
+    echo " -hs <hsample>                    Sample Name(s) to be ON HOLD (as they appear in the json file from Freezeman) (default: none)."
     exit 1                      
     }
 
-while getopts 'hr:d::l::s::x:' OPTION; do
+while getopts 'hr:d::l::s::x::hs:' OPTION; do
     case "$OPTION" in
       r)
         runfolder="$OPTARG"
@@ -32,6 +33,9 @@ while getopts 'hr:d::l::s::x:' OPTION; do
         ;;
       x)
         xsample+=("$OPTARG")
+        ;;
+      hs)
+        hsample+=("$OPTARG")
         ;;
       h)
         usage
@@ -52,7 +56,10 @@ if declare -p sample >&/dev/null; then
 fi
 if declare -p xsample >&/dev/null; then
     run_processing2json_args="${run_processing2json_args} -x ${xsample[*]}"
-    transfer_args="-x ${xsample[*]}"
+    transfer_args="${transfer_args} -x ${xsample[*]}"
+if declare -p hsample >&/dev/null; then
+    run_processing2json_args="${run_processing2json_args} -hs ${hsample[*]}"
+    transfer_args="${transfer_args} -x ${hsample[*]}"
 fi
 
 export MUGQIC_INSTALL_HOME=/cvmfs/soft.mugqic/CentOS6

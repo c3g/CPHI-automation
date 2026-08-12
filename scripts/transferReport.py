@@ -23,7 +23,7 @@ def parse_arguments():
         '-i',
         '--input',
         required=True,
-        help="Folder containing the transfer jsons to be summarized."
+        help="Folder containing the project tracking and transfer jsons to be summarized."
         )
     parser.add_argument(
         '-o',
@@ -44,12 +44,59 @@ def load_json_file(file_path):
         logger.error(f"Error decoding JSON file: {file_path}")
     return None
 
+def summarize_runs(pt_jsons, transfer_jsons, output):
+    """
+    Create dictionary including all sequenced samples.
+    """
+    sequenced_samples = []
+
+    transferred_samples = summarize_transfers(transfer_jsons, output)
+
+    for _, pt_json in pt_jsons.items():
+        run_id = pt_json["run_ext_id"]
+        run_folder = pt_json["run_name"]
+        run_number = run_folder.split("_")[2]
+        run_date = datetime.strptime(run_folder.split("_")[0], "%Y%m%d").strftime("%Y-%m-%d") if len(run_folder.split("_")[0]) == 8 else datetime.strptime(run_folder.split("_")[0], "%y%m%d").strftime("%Y-%m-%d")
+        for sample in pt_json["specimen"]:
+            sample_name = sample["sample"][0].get("sample_name")
+            if sample_name.startswith("NRGI"):
+                readset_id = sample["sample"][0].get("sample_ext_id")
+                sample_readset = f"{sample_name}_{readset_id}"
+                readset_status = sample["sample"][0]["readset"][0].get("readset_state")
+                
+                metrics = sample["sample"][0]["readset"][0]["metric"]
+                concordance = next(m for m in metrics if m["metric_name"] == "sex_concordance")
+                sex_concordance_flag = concordance["metric_flag"]
+                mixup = next(m for m in metrics if m["metric_name"] == "other_sample_match")
+                mixup_flag = mixup["metric_flag"]
+              
+                sample_data = {
+                        "sample_name": sample_name,
+                        "readset_id": readset_id,
+                        "run_id": run_id,
+                        "run_number": run_number,
+                        "run_date": run_date,
+                        "readset_status": readset_status,
+                        "sex_concordance_flag": sex_concordance_flag,
+                        "sample_mixup_flag": mixup_flag,
+                        "transfer_date": transferred_samples[sample_readset].get("transfer_date", "NA") if transferred_samples.get(sample_readset) else "NA"
+                        }
+                
+                sequenced_samples.append(sample_data)
+        
+    headers = sequenced_samples[0].keys()
+
+    with open(output, "w") as f:
+        writer = csv.DictWriter(f, fieldnames=headers, delimiter="\t")
+        writer.writeheader()
+        writer.writerows(sequenced_samples)
+
 def summarize_transfers(transfer_jsons, output):
     """
-    Creates a table summarizing samples that have been transferred.
+    Creates a table summarizing all samples, including transferred status.
     """
 
-    transferred_samples = []
+    transferred_samples = {}
 
     for _, transfer_json in transfer_jsons.items():
         run_folder = re.search(r"--label\s+(\S+)", transfer_json['operation_cmd_line']).group(1)
@@ -59,24 +106,26 @@ def summarize_transfers(transfer_jsons, output):
 
         for readset in transfer_json["readset"]:
             readset_name = readset["readset_name"]
+            sample_name = readset_name.split("_")[0]
+            readset_id = readset_name.split("_")[1]
             sample_data = {
-                "sample_name": readset_name.split("_")[0],
-                "readset_id": readset_name.split("_")[1],
+                "sample_name": sample_name,
+                "readset_id": readset_id,
                 "run_id": readset_name.split("_")[2],
                 "run_number": run_number,
                 "run_date": run_date,
                 "transfer_date": transfer_date
                 }
-            transferred_samples.append(sample_data)
+            transferred_samples[f"{sample_name}_{readset_id}"] = sample_data
 
-    headers = transferred_samples[0].keys()
+    # headers = list(next(iter(transferred_samples.values())).keys())
     
-    with open(f"{output}.tsv", "w") as f:
-        writer = csv.DictWriter(f, fieldnames=headers, delimiter="\t")
-        writer.writeheader()
-        writer.writerows(transferred_samples)
+    #with open(output, "w") as f:
+    #    writer = csv.DictWriter(f, fieldnames=headers, delimiter="\t")
+    #    writer.writeheader()
+    #    writer.writerows(transferred_samples)
 
-    monthly_counts = Counter(d["transfer_date"][:7] for d in transferred_samples)
+    monthly_counts = Counter(d["transfer_date"][:7] for d in transferred_samples.values())
     counts = dict(sorted(monthly_counts.items()))
 
     with open(f"{output}_summary.tsv", "w") as f:
@@ -86,6 +135,7 @@ def summarize_transfers(transfer_jsons, output):
             writer.writerow([key, value])
     
     print(monthly_counts.total())
+    return transferred_samples
 
 def main():
     """ Main """
@@ -93,10 +143,13 @@ def main():
 
     output = args.output or f"{os.path.basename(args.input)}.json"
 
-    transfer_json_files = glob.glob(os.path.join(args.input, "*sd4h_transfer.json"))
+    pt_json_files = glob.glob(os.path.join(args.input, "pt_jsons", "*novaseqx.json"))
+    pt_jsons = {os.path.basename(file): load_json_file(file) for file in pt_json_files}
+
+    transfer_json_files = glob.glob(os.path.join(args.input, "transfer_jsons", "*sd4h_transfer.json"))
     transfer_jsons = {os.path.basename(file): load_json_file(file) for file in transfer_json_files}
 
-    summarize_transfers(transfer_jsons, output)
+    summarize_runs(pt_jsons, transfer_jsons, output)
 
 if __name__ == '__main__':
     main()

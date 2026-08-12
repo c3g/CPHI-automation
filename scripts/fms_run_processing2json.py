@@ -45,6 +45,12 @@ def parse_arguments():
         default=["1", "2", "3", "4", "5", "6", "7", "8"],
         help="Only considers lane(s) provided for json creation."
         )
+    parser.add_argument(
+        '-hs',
+        '--hsample',
+        nargs='+',
+        help="Labels sample(s) provided as on hold for json creation."
+        )
     group = parser.add_mutually_exclusive_group()
     group.add_argument(
         '-s',
@@ -56,7 +62,7 @@ def parse_arguments():
         '-x',
         '--xsample',
         nargs='+',
-        help="Ignores sample(s) provided for json creation."
+        help="Labels sample(s) provided as invalid for json creation."
         )
     return parser.parse_args()
 
@@ -71,7 +77,7 @@ def load_json_file(file_path):
         logger.error(f"Error decoding JSON file: {file_path}")
     return None
 
-def jsonify_run_processing(input_run_folder, fms_json, lanes_json, output, lanes, samples, xsamples, nucleic_acid_type):
+def jsonify_run_processing(input_run_folder, fms_json, lanes_json, output, lanes, samples, xsamples, hsamples, nucleic_acid_type):
     """
     Converts the Run Processing run validation file to a json file for project tracking database.
     Args:
@@ -155,19 +161,19 @@ def jsonify_run_processing(input_run_folder, fms_json, lanes_json, output, lanes
                         "location_uri": f"abacus://{cram}",
                         "file_name": f"{os.path.basename(cram)}",
                         "file_md5sum": compute_md5(cram),
-                        "file_deliverable": False if sample_name in xsamples else True
+                        "file_deliverable": False if sample_name in xsamples or sample_name in hsamples else True
                         },
                     {
                         "location_uri": f"abacus://{crai}",
                         "file_name": f"{os.path.basename(crai)}",
                         "file_md5sum": compute_md5(crai),
-                        "file_deliverable": False if sample_name in xsamples else True
+                        "file_deliverable": False if sample_name in xsamples or sample_name in hsamples else True
                         },
                     {
                         "location_uri": f"abacus://{dragen_tar}",
                         "file_name": f"{os.path.basename(dragen_tar)}",
                         "file_md5sum": compute_md5(dragen_tar),
-                        "file_deliverable": False if sample_name in xsamples else True
+                        "file_deliverable": False if sample_name in xsamples or sample_name in hsamples else True
                     }
                     ]
                 for job in next(step["jobs"] for step in lane_json["steps"] if step["step_name"] == "align"):
@@ -213,7 +219,13 @@ def jsonify_run_processing(input_run_folder, fms_json, lanes_json, output, lanes
                         raw_mean_coverage_flag = get_flag(raw_mean_coverage)
                         raw_mean_coverage, raw_mean_coverage_flag = check_na(raw_mean_coverage, raw_mean_coverage_flag)
                         if raw_mean_coverage_flag == "PASS" and readset["library_type"] != "RNASeq":
-                            raw_mean_coverage_flag = dna_raw_mean_coverage_check(sample_name, raw_mean_coverage, lane_mean_coverage)     
+                            raw_mean_coverage_flag = dna_raw_mean_coverage_check(sample_name, raw_mean_coverage, lane_mean_coverage)
+
+                        sex_concordance = run_v.get("alignment", {}).get("sex_concordance")
+                        sex_concordance_flag = sex_concordance_check(sample_name, sex_concordance)
+
+                        other_sample_match = run_v.get("qc", {}).get("other_snp_array_matches")
+                        other_sample_match_flag = sample_match_check(sample_name, other_sample_match)
                         metric_json = [
                             {
                                 "metric_name": "raw_reads_count",
@@ -240,7 +252,17 @@ def jsonify_run_processing(input_run_folder, fms_json, lanes_json, output, lanes
                                 "metric_name": "raw_mean_coverage",
                                 "metric_value": raw_mean_coverage,
                                 "metric_flag": raw_mean_coverage_flag
-                                }
+                                },
+                            {
+                                "metric_name": "sex_concordance",
+                                "metric_value": sex_concordance,
+                                "metric_flag": sex_concordance_flag
+                                },
+                            {
+                                "metric_name": "other_sample_match",
+                                "metric_value": other_sample_match,
+                                "metric_flag": other_sample_match_flag
+                            }
                             ]
 
                 readset_name = f"{sample_name}_{readset['derived_sample_obj_id']}_{lane_json['run_obj_id']}_L00{lane_json['lane']}"
@@ -254,6 +276,7 @@ def jsonify_run_processing(input_run_folder, fms_json, lanes_json, output, lanes
                     for fms_s in fms_json["samples"]:
                         if fms_s.get("sample_name") == sample_name:
                             library_kit = fms_s["library_kit"]
+                    
                     readset_json = {
                         "experiment_sequencing_technology": None,
                         "experiment_type": f"{readset['library_type']}",
@@ -266,7 +289,7 @@ def jsonify_run_processing(input_run_folder, fms_json, lanes_json, output, lanes
                         "readset_adapter2": f"{readset['barcodes'][0]['ADAPTERi5']}",
                         "readset_sequencing_type": f"{lane_json['sequencing_method']}",
                         "readset_quality_offset": "33",
-                        "readset_state": "INVALID" if sample_name in xsamples else "VALID",
+                        "readset_state": "INVALID" if sample_name in xsamples else "ON HOLD" if sample_name in hsamples else "VALID",
                         "file": file_json,
                         "metric": metric_json,
                         "operation": operation_json
@@ -358,6 +381,25 @@ def median_insert_size_check(sample, value):
         ret = "PASS"
     return ret
 
+def sex_concordance_check(sample, value):
+    """ Sex concordance (true or false) check """
+    if value == None:
+        ret = "WARNING"
+        logger.warning(f"Missing 'sex concordance' value for {sample} from json.")
+    elif value == False:
+        ret = "FAILED"
+    else:
+        ret = "PASS"
+    return ret
+
+def sample_match_check(sample, value):
+    """ Check if sample matches other SNP arrays """
+    if len(value) == 0:
+        ret = "PASS"
+    else:
+        ret = "FAILED"
+    return ret
+
 def get_reference(command):
     """ Parse reference used from dragen command """
     ref_dir = re.search(r"--ref-dir \S*", command)[0].split(" ")[1]
@@ -409,8 +451,12 @@ def main():
         xsamples = list(args.xsample)
     else:
         xsamples = []
+    if args.hsample:
+        hsamples = list(args.hsample)
+    else:
+        hsamples = []
 
-    jsonify_run_processing(args.input, fms_json, lanes_json, output, lanes, samples, xsamples, args.nucleic_acid_type)
+    jsonify_run_processing(args.input, fms_json, lanes_json, output, lanes, samples, xsamples, hsamples, args.nucleic_acid_type)
 
 if __name__ == '__main__':
     main()
