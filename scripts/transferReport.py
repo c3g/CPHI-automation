@@ -44,11 +44,22 @@ def load_json_file(file_path):
         logger.error(f"Error decoding JSON file: {file_path}")
     return None
 
-def summarize_runs(pt_jsons):
+def summarize_runs(pt_jsons, transfer_jsons, output):
     """
     Create dictionary including all sequenced samples.
     """
+    sequenced_samples = []
 
+    transferred_samples = summarize_transfers(transfer_jsons, output)
+
+    for _, pt_json in pt_jsons.items():
+        for sample in pt_json["specimen"]:
+            sample_name = sample["sample"][0].get("sample_name")
+            if sample_name.startswith("NRGI"):
+                readset_id = sample["sample"][0].get("sample_ext_id")
+                readset_status = sample["sample"][0]["readset"][0].get("readset_state")
+                sex_concordance_flag = sample["sample"][0]["readset"][0]["metric"] # TBD how
+                mixup_flag = # TBD how to access
 
 
 def summarize_transfers(transfer_jsons, output):
@@ -66,15 +77,17 @@ def summarize_transfers(transfer_jsons, output):
 
         for readset in transfer_json["readset"]:
             readset_name = readset["readset_name"]
+            sample_name = readset_name.split("_")[0]
+            readset_id = readset_name.split("_")[1]
             sample_data = {
-                "sample_name": readset_name.split("_")[0],
-                "readset_id": readset_name.split("_")[1],
+                "sample_name": sample_name,
+                "readset_id": readset_id,
                 "run_id": readset_name.split("_")[2],
                 "run_number": run_number,
                 "run_date": run_date,
                 "transfer_date": transfer_date
                 }
-            transferred_samples.append(sample_data)
+            transferred_samples[f"{sample_name}_{readset_id}"].append(sample_data)
 
     headers = transferred_samples[0].keys()
     
@@ -93,6 +106,7 @@ def summarize_transfers(transfer_jsons, output):
             writer.writerow([key, value])
     
     print(monthly_counts.total())
+    return transferred_samples
 
 def main():
     """ Main """
@@ -106,8 +120,7 @@ def main():
     transfer_json_files = glob.glob(os.path.join(args.input, "transfer_jsons", "*sd4h_transfer.json"))
     transfer_jsons = {os.path.basename(file): load_json_file(file) for file in transfer_json_files}
 
-    sequenced_samples = summarize_runs(pt_jsons)
-    summarize_transfers(transfer_jsons, sequenced_samples, output)
+    summarize_runs(pt_jsons, transfer_jsons, output)
 
 if __name__ == '__main__':
     main()
