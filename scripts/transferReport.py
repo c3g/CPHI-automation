@@ -128,7 +128,7 @@ def summarize_transfers(transfer_jsons, output):
     monthly_counts = Counter(d["transfer_date"][:7] for d in transferred_samples.values())
     counts = dict(sorted(monthly_counts.items()))
 
-    with open(f"{output}_summary", "w") as f:
+    with open(f"{output}_summary.tsv", "w") as f:
         writer = csv.writer(f, delimiter="\t")
         writer.writerow(["month", "samples_transferred"])
         for key, value in counts.items():
