@@ -69,6 +69,17 @@ def summarize_runs(pt_jsons, transfer_jsons, output):
                 sex_concordance_flag = concordance["metric_flag"]
                 mixup = next(m for m in metrics if m["metric_name"] == "other_sample_match")
                 mixup_flag = mixup["metric_flag"]
+
+                if sex_concordance_flag == "FAILED" and mixup_flag == "FAILED":
+                    matches = [key for key in mixup["metric_value"].keys()]
+                    issue = f"sex discordance; sample matches other sample(s): {matches}"
+                elif sex_concordance_flag == "FAILED":
+                    issue = f"sex discordance"
+                elif mixup_flag == "FAILED":
+                    matches = [key for key in mixup["metric_value"].keys()]
+                    issue = f"sample matches other sample(s): {matches}"
+                else:
+                    issue = None
               
                 sample_data = {
                         "sample_name": sample_name,
@@ -79,6 +90,7 @@ def summarize_runs(pt_jsons, transfer_jsons, output):
                         "readset_status": readset_status,
                         "sex_concordance_flag": sex_concordance_flag,
                         "sample_mixup_flag": mixup_flag,
+                        "issue": issue if issue else "",
                         "transfer_date": transferred_samples[sample_readset].get("transfer_date", "NA") if transferred_samples.get(sample_readset) else "NA"
                         }
                 
