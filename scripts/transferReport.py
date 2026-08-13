@@ -63,6 +63,8 @@ def summarize_runs(pt_jsons, transfer_jsons, output):
                 readset_id = sample["sample"][0].get("sample_ext_id")
                 sample_readset = f"{sample_name}_{readset_id}"
                 readset_status = sample["sample"][0]["readset"][0].get("readset_state")
+
+                transfer_date = transferred_samples[sample_readset].get("transfer_date", "NA") if transferred_samples.get(sample_readset) else None
                 
                 metrics = sample["sample"][0]["readset"][0]["metric"]
                 concordance = next(m for m in metrics if m["metric_name"] == "sex_concordance")
@@ -70,12 +72,12 @@ def summarize_runs(pt_jsons, transfer_jsons, output):
                 mixup = next(m for m in metrics if m["metric_name"] == "other_sample_match")
                 mixup_flag = mixup["metric_flag"]
 
-                if sex_concordance_flag == "FAILED" and mixup_flag == "FAILED":
+                if sex_concordance_flag == "FAILED" and mixup_flag == "FAILED" and transfer_date == None:
                     matches = [key for key in mixup["metric_value"].keys()]
                     issue = f"sex discordance; sample matches other sample(s): {matches}"
-                elif sex_concordance_flag == "FAILED":
+                elif sex_concordance_flag == "FAILED" and transfer_date == None:
                     issue = f"sex discordance"
-                elif mixup_flag == "FAILED":
+                elif mixup_flag == "FAILED" and transfer_date == None:
                     matches = [key for key in mixup["metric_value"].keys()]
                     issue = f"sample matches other sample(s): {", ".join(matches)}"
                 else:
@@ -91,7 +93,7 @@ def summarize_runs(pt_jsons, transfer_jsons, output):
                         "sex_concordance_flag": sex_concordance_flag,
                         "sample_mixup_flag": mixup_flag,
                         "issue": issue if issue else "",
-                        "transfer_date": transferred_samples[sample_readset].get("transfer_date", "NA") if transferred_samples.get(sample_readset) else "NA"
+                        "transfer_date": transfer_date if transfer_date else ""
                         }
                 
                 sequenced_samples.append(sample_data)
