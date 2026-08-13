@@ -26,7 +26,7 @@ done
 export MUGQIC_INSTALL_HOME=/cvmfs/soft.mugqic/CentOS6
 module use "$MUGQIC_INSTALL_HOME/modulefiles"
 
-if [ -s "$input"  ]; then
+if [ -s "$trackingfolder"  ]; then
     TRANSFER_PATH=$trackingfolder
 else
     echo "Error incorrect number of command line arguments."
