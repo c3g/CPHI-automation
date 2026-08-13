@@ -74,7 +74,7 @@ def summarize_runs(pt_jsons, transfer_jsons, output):
 
                 if sex_concordance_flag == "FAILED" and mixup_flag == "FAILED" and transfer_date == None:
                     matches = [key for key in mixup["metric_value"].keys()]
-                    issue = f"sex discordance; sample matches other sample(s): {matches}"
+                    issue = f"sex discordance; sample matches other sample(s): {", ".join(matches)}"
                 elif sex_concordance_flag == "FAILED" and transfer_date == None:
                     issue = f"sex discordance"
                 elif mixup_flag == "FAILED" and transfer_date == None:
