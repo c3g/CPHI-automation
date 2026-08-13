@@ -1,18 +1,40 @@
 #!/bin/bash
+set -e -o pipefail
 
-# DOVEE -- FINISHED ANALYSIS MONITOR AND NOTIFIER
-# check for Dovee log file that is newer than timestamp. If found, send notification.
-########################################################
+usage() {
+    echo "script usage: ProjectTracking_RunProcessing.sh -h [-t trackingfolder]"
+    echo "Usage:"
+    echo " -h                       Display this help message."
+    echo " -t <trackingfolder>      Project tracking folder that contains subfolder with pt and transfer jsons."
+    exit 1
+    }
 
-if [ "$#" != 1  ]
-then
+while getopts 'ht:' OPTION; do
+    case "$OPTION" in
+    t)
+      trackingfolder="$OPTARG"
+      ;;
+    h)
+      usage
+      ;;
+    ?)
+      usage
+      ;;
+    esac
+done
+
+export MUGQIC_INSTALL_HOME=/cvmfs/soft.mugqic/CentOS6
+module use "$MUGQIC_INSTALL_HOME/modulefiles"
+
+if [ -s "$input"  ]; then
+    TRANSFER_PATH=$trackingfolder
+else
     echo "Error incorrect number of command line arguments."
-    echo "Usage: $(basename $0) <transfer_dir>"
-    exit
+    echo "Usage: $(basename $0) -t <transfer_dir>"
+    exit 1
 fi
 ########################################################
 # Set file paths
-TRANSFER_PATH=$(realpath ${1}) # where to look for transfer json files
 REPORT_PATH=/lb/project/mugqic/projects/mjaniak/PCGL/cphi_project_tracking/summary_reports
 
 ########################################################
