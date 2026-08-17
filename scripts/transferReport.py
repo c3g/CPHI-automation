@@ -82,6 +82,11 @@ def summarize_runs(pt_jsons, transfer_jsons, output):
                     issue = f"sample matches other sample(s): {", ".join(matches)}"
                 else:
                     issue = None
+
+                if sex_concordance_flag == "FAILED" and transfer_date != None:
+                    sex_concordance_flag = "RESOLVED"
+                if mixup_flag == "FAILED" and transfer_date != None:
+                    mixup_flag = "RESOLVED"
               
                 sample_data = {
                         "sample_name": sample_name,
