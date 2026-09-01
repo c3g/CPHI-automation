@@ -57,6 +57,7 @@ fi
 if declare -p xsample >&/dev/null; then
     run_processing2json_args="${run_processing2json_args} -x ${xsample[*]}"
     transfer_args="${transfer_args} -x ${xsample[*]}"
+fi
 if declare -p hsample >&/dev/null; then
     run_processing2json_args="${run_processing2json_args} -hs ${hsample[*]}"
     transfer_args="${transfer_args} -x ${hsample[*]}"
@@ -69,7 +70,7 @@ module use "$MUGQIC_INSTALL_HOME/modulefiles" "$MUGQIC_INSTALL_HOME_DEV/modulefi
 ##################################################
 # Initialization
 #module purge
-# module load mugqic/python/3.12.2
+#module load mugqic/python/3.12.2
 
 #source ~/project_tracking_cli/venv/bin/activate
 
@@ -107,3 +108,4 @@ fi
 # transfer cram, crais, and dragen tars to CPHI collection on SD4H
 echo "Transfer started towards $destination. See log file ${run_processing_json/.json/_${destination}_${TIMESTAMP}_transfer.log}"
 ~/CPHI-automation/scripts/fms_transfer_RunProcessing.sh -r "$run_processing_json" -d "$destination" "$transfer_args" > "${run_processing_json/.json/_${destination}_${TIMESTAMP}_transfer.log}"
+
